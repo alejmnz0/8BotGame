@@ -7,7 +7,6 @@ sprite = pygame.image.load("../assets/default.png")
 robot = Bot(sprite)
 
 ventana = pygame.display.set_mode((1600, 900))
-superficie = pygame.Surface((1600, 900))
 pygame.display.set_caption("8BotGame")
 font = pygame.font.Font(None, 50)
 
@@ -16,17 +15,16 @@ while jugando:
     ventana.fill((255, 255, 255))
     ventana.blit(robot.sprite, robot.position)
     for event in pygame.event.get():
-    #     if event.type == pygame.KEYDOWN:
-    #         match event.key:
-    #             case pygame.K_RIGHT:
-    #                 robot.move_right()
-    #             case pygame.K_LEFT:
-    #                 robot.move_left()
-    #             case pygame.K_UP:
-    #                 robot.move_up()
-    #             case pygame.K_DOWN:
-    #                 robot.move_down()
-
+        if event.type == pygame.KEYDOWN:
+            match event.key:
+                case pygame.K_d:
+                    robot.move_right()
+                case pygame.K_a:
+                    robot.move_left()
+                case pygame.K_w:
+                    robot.move_up()
+                case pygame.K_s:
+                    robot.move_down()
         if event.type == pygame.QUIT:
             jugando = False
 
