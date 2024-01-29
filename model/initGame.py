@@ -1,10 +1,12 @@
 import pygame
-
 from model.Bot import Bot
+import enviroment
 
 pygame.init()
 sprite = pygame.image.load("../assets/default.png")
 robot = Bot(sprite)
+tilemap = open(enviroment.fichero).readline().split(',')
+print(tilemap)
 
 ventana = pygame.display.set_mode((1600, 900))
 pygame.display.set_caption("8BotGame")
