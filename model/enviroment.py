@@ -1,7 +1,7 @@
 file = '../assets/options.txt'
 wall_image = '../assets/murillo.png'
-ground_image = '../assets/ground.png'
-character = '../assets/character.png'
+terrain_sprites = '../assets/terrain_sprites.png'
+character_sprites = '../assets/character_sprites.png'
 width = 1600
 height = 900
 tilesize = 25
@@ -10,4 +10,5 @@ blue = (0, 0, 255)
 red = (255, 0, 0)
 black = (0, 0, 0)
 fps = 60
-player_layer = 1
+player_layer = 2
+wall_layer = 1

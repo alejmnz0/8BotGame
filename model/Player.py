@@ -15,8 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.facing = 'down'
         self.width = enviroment.tilesize
         self.height = enviroment.tilesize
-        self.image = pygame.Surface([self.width, self.height])
-        self.image.fill(enviroment.red)
+        self.image = self.game.character_spritesheet.get_sprite(0, 0, self.width, self.height)
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y

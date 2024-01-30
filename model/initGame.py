@@ -1,26 +1,13 @@
-import pygame
 import enviroment
-import Wall
 from model.Game import Game
 
-pygame.init()
-sprite = pygame.image.load(enviroment.character)
-ventana = pygame.display.set_mode((enviroment.width, enviroment.height))
 tilemap1 = open(enviroment.file).read().split("\n")
 tilemap2 = []
 for x in tilemap1:
     tilemap2.append(x.split(','))
 
-
-def createTilemap(self):
-    for i, row in enumerate(tilemap2):
-        for j, column in enumerate(row):
-            if column == 'b':
-                Wall.Wall(j, i)
-
-
 game = Game()
-game.new_game()
+game.new_game(tilemap2)
 while game.playing:
     game.events()
     game.update()
