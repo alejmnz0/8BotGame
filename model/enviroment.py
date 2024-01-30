@@ -5,6 +5,7 @@ character = '../assets/character.png'
 width = 1600
 height = 900
 tilesize = 25
+player_speed = 3
 blue = (0, 0, 255)
 red = (255, 0, 0)
 black = (0, 0, 0)
