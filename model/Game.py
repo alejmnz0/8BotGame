@@ -3,6 +3,8 @@ import enviroment
 from model.Player import Player
 from model.Spritesheet import Spritesheet
 from model.Wall import Wall
+from model.Ground import Ground
+from model.Water import Water
 
 
 class Game:
@@ -41,3 +43,7 @@ class Game:
             for j, column in enumerate(row):
                 if column == 'b':
                     Wall(self, j, i)
+                elif column == '-':
+                    Ground(self, j, i)
+                elif column == 'w':
+                    Water(self, j, i)
