@@ -8,7 +8,7 @@ class Oxigen(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.game = game
         self._layer = enviroment.player_layer
-        self.groups = self.game.all_sprites
+        self.groups = self.game.all_sprites, self.game.items
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.x = x * enviroment.tilesize
         self.y = y * enviroment.tilesize

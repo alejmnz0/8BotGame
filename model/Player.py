@@ -2,6 +2,11 @@ import pygame.sprite
 import enviroment
 import math
 
+import model.Diamond
+import model.Bomb
+import model.Water
+import model.Heart
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -11,6 +16,8 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.x = x * enviroment.tilesize
         self.y = y * enviroment.tilesize
+        self.hp = 100
+        self.inventory = []
         self.x_change = 0
         self.y_change = 0
         self.facing = 'down'
@@ -25,6 +32,8 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.movement()
         self.animate()
+        self.grab_item()
+        self.take_damage()
         self.rect.x += self.x_change
         self.collide_block('x')
         self.rect.y += self.y_change
@@ -63,6 +72,27 @@ class Player(pygame.sprite.Sprite):
                     self.rect.y = hits[0].rect.top - self.rect.height
                 elif self.y_change < 0:
                     self.rect.y = hits[0].rect.bottom
+
+    def grab_item(self):
+        hits = pygame.sprite.spritecollide(self, self.game.items, True)
+        if hits:
+            match type(hits[0]):
+                case model.Bomb.Bomb:
+                    self.inventory.append('x')
+                case model.Heart.Heart:
+                    self.hp += enviroment.heart_healing
+
+    def take_damage(self):
+        hits = pygame.sprite.spritecollide(self, self.game.threats, False)
+        if hits:
+            match type(hits[0]):
+                case model.Water.Water:
+                    self.hp -= enviroment.water_damage
+                    print(self.hp)
+                    if self.hp <= 0:
+                        self.game.running = False
+                        self.game.playing = False
+
 
     def animate(self):
         down_animations = [self.game.character_spritesheet.get_sprite(0, 0, self.width, self.height),

@@ -1,4 +1,3 @@
-import enviroment
 from model.Game import Game
 
 game = Game()

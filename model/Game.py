@@ -27,6 +27,8 @@ class Game:
         self.playing = True
         self.all_sprites = pygame.sprite.LayeredUpdates()
         self.walls = pygame.sprite.LayeredUpdates()
+        self.items = pygame.sprite.LayeredUpdates()
+        self.threats = pygame.sprite.LayeredUpdates()
         self.create_map()
         self.play_music()
 
@@ -89,17 +91,21 @@ class Game:
 
     def play_music(self):
         pygame.mixer.music.load('../assets/theme.mp3')
-        pygame.mixer.music.set_volume(0.05)
+        pygame.mixer.music.set_volume(0.5)
         pygame.mixer.music.play(10)
 
     def randomize_objects(self, list, changes, object):
+        # Cogemos los indices de los - en el mapa
         index = [i for i, x in enumerate([elem for sublist in list for elem in sublist]) if x == '-']
 
+        # Se escogen los indices que se van a cambiar por el nuevo caracter
         selected_index = random.sample(index, changes)
 
+        # Se crea la nueva lista cambiando los - elegidos por el caracter
         new_list_raw = [object if i in selected_index else x for i, x in
                         enumerate([elem for sublist in list for elem in sublist])]
 
+        # Se reformatea la lista para dejarla como una lista de listas al igual que entró
         new_list = [new_list_raw[n:n + len(list[0])] for n in range(0, len(new_list_raw), len(list[0]))]
 
         return new_list
