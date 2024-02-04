@@ -6,6 +6,9 @@ import model.Diamond
 import model.Bomb
 import model.Water
 import model.Heart
+import model.Oxigen
+from model.Bomb import Bomb
+from model.Explotion import Explotion
 
 
 class Player(pygame.sprite.Sprite):
@@ -16,8 +19,13 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.x = x * enviroment.tilesize
         self.y = y * enviroment.tilesize
-        self.hp = 100
-        self.inventory = []
+        self.hp = enviroment.max_hp
+        self.points = 0
+        # self.inventory = []
+        self.key_pressed = False
+        self.dive_suit = False
+        self.aquatic = False
+        self.bombs = 0
         self.x_change = 0
         self.y_change = 0
         self.facing = 'down'
@@ -33,7 +41,9 @@ class Player(pygame.sprite.Sprite):
         self.movement()
         self.animate()
         self.grab_item()
+        self.set_bomb()
         self.take_damage()
+        self.change_suit()
         self.rect.x += self.x_change
         self.collide_block('x')
         self.rect.y += self.y_change
@@ -78,21 +88,46 @@ class Player(pygame.sprite.Sprite):
         if hits:
             match type(hits[0]):
                 case model.Bomb.Bomb:
-                    self.inventory.append('x')
+                    self.bombs += 1
                 case model.Heart.Heart:
-                    self.hp += enviroment.heart_healing
+                    if self.hp + enviroment.heart_healing > enviroment.max_hp:
+                        self.hp = enviroment.max_hp
+                    else:
+                        self.hp += enviroment.heart_healing
+                case model.Oxigen.Oxigen:
+                    self.dive_suit = True
+                case model.Diamond.Diamond:
+                    self.points += 25
+
+    def set_bomb(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_b] and not enviroment.b_pressed and self.bombs > 0:
+            print('hola')
+            bomb = Bomb(self.game, self.rect.x, self.rect.y)
+            bomb.collide_blocks()
+            enviroment.b_pressed = True
+            self.bombs -= 1
+        elif not keys[pygame.K_b]:
+            enviroment.b_pressed = False
+
+    def change_suit(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_t] and self.dive_suit and not enviroment.t_pressed:
+            self.aquatic = not self.aquatic
+            enviroment.t_pressed = True
+        elif not keys[pygame.K_t]:
+            enviroment.t_pressed = False
+
 
     def take_damage(self):
         hits = pygame.sprite.spritecollide(self, self.game.threats, False)
         if hits:
             match type(hits[0]):
                 case model.Water.Water:
-                    self.hp -= enviroment.water_damage
-                    print(self.hp)
-                    if self.hp <= 0:
-                        self.game.running = False
-                        self.game.playing = False
-
+                    if not self.aquatic:
+                        self.hp -= enviroment.water_damage
+                        if self.hp <= 0:
+                            self.game.playing = False
 
     def animate(self):
         down_animations = [self.game.character_spritesheet.get_sprite(0, 0, self.width, self.height),
@@ -110,37 +145,91 @@ class Player(pygame.sprite.Sprite):
         right_animations = [self.game.character_spritesheet.get_sprite(150, 0, self.width, self.height),
                             self.game.character_spritesheet.get_sprite(175, 0, self.width, self.height),
                             self.game.character_spritesheet.get_sprite(200, 0, self.width, self.height)]
+
+        dive_down_animations = [self.game.dive_spritesheet.get_sprite(0, 0, self.width, self.height),
+                           self.game.dive_spritesheet.get_sprite(25, 0, self.width, self.height),
+                           self.game.dive_spritesheet.get_sprite(50, 0, self.width, self.height)]
+
+        dive_up_animations = [self.game.dive_spritesheet.get_sprite(75, 0, self.width, self.height),
+                         self.game.dive_spritesheet.get_sprite(100, 0, self.width, self.height),
+                         self.game.dive_spritesheet.get_sprite(125, 0, self.width, self.height)]
+
+        dive_left_animations = [self.game.dive_spritesheet.get_sprite(225, 0, self.width, self.height),
+                           self.game.dive_spritesheet.get_sprite(250, 0, self.width, self.height),
+                           self.game.dive_spritesheet.get_sprite(275, 0, self.width, self.height)]
+
+        dive_right_animations = [self.game.dive_spritesheet.get_sprite(150, 0, self.width, self.height),
+                            self.game.dive_spritesheet.get_sprite(175, 0, self.width, self.height),
+                            self.game.dive_spritesheet.get_sprite(200, 0, self.width, self.height)]
+
         if self.facing == 'down':
             if self.y_change == 0:
-                self.image = self.game.character_spritesheet.get_sprite(0, 0, self.width, self.height)
+                if not self.aquatic:
+                    self.image = self.game.character_spritesheet.get_sprite(0, 0, self.width, self.height)
+                else:
+                    self.image = self.game.dive_spritesheet.get_sprite(0, 0, self.width, self.height)
             else:
-                self.image = down_animations[math.floor(self.animation_loop)]
-                self.animation_loop += 0.1
-                if self.animation_loop >= 3:
-                    self.animation_loop = 1
+                if not self.aquatic:
+                    self.image = down_animations[math.floor(self.animation_loop)]
+                    self.animation_loop += 0.1
+                    if self.animation_loop >= 3:
+                        self.animation_loop = 1
+                else:
+                    self.image = dive_down_animations[math.floor(self.animation_loop)]
+                    self.animation_loop += 0.1
+                    if self.animation_loop >= 3:
+                        self.animation_loop = 1
+
         if self.facing == 'up':
             if self.y_change == 0:
-                self.image = self.game.character_spritesheet.get_sprite(75, 0, self.width, self.height)
+                if not self.aquatic:
+                    self.image = self.game.character_spritesheet.get_sprite(75, 0, self.width, self.height)
+                else:
+                    self.image = self.game.dive_spritesheet.get_sprite(75, 0, self.width, self.height)
             else:
-                self.image = up_animations[math.floor(self.animation_loop)]
-                self.animation_loop += 0.1
-                if self.animation_loop >= 3:
-                    self.animation_loop = 1
+                if not self.aquatic:
+                    self.image = up_animations[math.floor(self.animation_loop)]
+                    self.animation_loop += 0.1
+                    if self.animation_loop >= 3:
+                        self.animation_loop = 1
+                else:
+                    self.image = dive_up_animations[math.floor(self.animation_loop)]
+                    self.animation_loop += 0.1
+                    if self.animation_loop >= 3:
+                        self.animation_loop = 1
 
         if self.facing == 'left':
             if self.x_change == 0:
-                self.image = self.game.character_spritesheet.get_sprite(225, 0, self.width, self.height)
+                if not self.aquatic:
+                    self.image = self.game.character_spritesheet.get_sprite(225, 0, self.width, self.height)
+                else:
+                    self.image = self.game.dive_spritesheet.get_sprite(225, 0, self.width, self.height)
             else:
-                self.image = left_animations[math.floor(self.animation_loop)]
-                self.animation_loop += 0.1
-                if self.animation_loop >= 3:
-                    self.animation_loop = 1
+                if not self.aquatic:
+                    self.image = left_animations[math.floor(self.animation_loop)]
+                    self.animation_loop += 0.1
+                    if self.animation_loop >= 3:
+                        self.animation_loop = 1
+                else:
+                    self.image = dive_left_animations[math.floor(self.animation_loop)]
+                    self.animation_loop += 0.1
+                    if self.animation_loop >= 3:
+                        self.animation_loop = 1
 
         if self.facing == 'right':
             if self.x_change == 0:
-                self.image = self.game.character_spritesheet.get_sprite(150, 0, self.width, self.height)
+                if not self.aquatic:
+                    self.image = self.game.character_spritesheet.get_sprite(150, 0, self.width, self.height)
+                else:
+                    self.image = self.game.dive_spritesheet.get_sprite(150, 0, self.width, self.height)
             else:
-                self.image = right_animations[math.floor(self.animation_loop)]
-                self.animation_loop += 0.1
-                if self.animation_loop >= 3:
-                    self.animation_loop = 1
+                if not self.aquatic:
+                    self.image = right_animations[math.floor(self.animation_loop)]
+                    self.animation_loop += 0.1
+                    if self.animation_loop >= 3:
+                        self.animation_loop = 1
+                else:
+                    self.image = dive_right_animations[math.floor(self.animation_loop)]
+                    self.animation_loop += 0.1
+                    if self.animation_loop >= 3:
+                        self.animation_loop = 1

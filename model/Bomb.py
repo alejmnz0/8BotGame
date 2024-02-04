@@ -1,20 +1,16 @@
 import pygame
 
-from model import enviroment
+from model.Item import Item
 
 
-class Bomb(pygame.sprite.Sprite):
+class Bomb(Item):
 
     def __init__(self, game, x, y):
-        self.game = game
-        self._layer = enviroment.player_layer
-        self.groups = self.game.all_sprites, self.game.items
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.x = x * enviroment.tilesize
-        self.y = y * enviroment.tilesize
-        self.width = enviroment.tilesize
-        self.height = enviroment.tilesize
+        super().__init__(game, x, y)
         self.image = self.game.objects_spritesheet.get_sprite(50, 0, self.width, self.height)
-        self.rect = self.image.get_rect()
-        self.rect.x = self.x
-        self.rect.y = self.y
+        self.radius_explotion = (self)
+
+    def collide_blocks(self):
+        self.x += 10
+        self.y += 10
+        hits = pygame.sprite.spritecollide(self, self.game.breakable_objects, True)

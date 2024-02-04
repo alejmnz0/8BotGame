@@ -2,7 +2,9 @@ import random
 
 import pygame
 import enviroment
+from model.Cracked import Cracked
 from model.Diamond import Diamond
+from model.Explotion import Explotion
 from model.Heart import Heart
 from model.Oxigen import Oxigen
 from model.Player import Player
@@ -19,9 +21,19 @@ class Game:
         self.screen = pygame.display.set_mode([enviroment.width, enviroment.height])
         self.clock = pygame.time.Clock()
         self.running = True
+        self.font = pygame.font.Font(enviroment.font, enviroment.font_size)
         self.character_spritesheet = Spritesheet(enviroment.character_sprites)
+        self.dive_spritesheet = Spritesheet(enviroment.dive_sprites)
         self.terrain_spritesheet = Spritesheet(enviroment.terrain_sprites)
         self.objects_spritesheet = Spritesheet(enviroment.objects_sprites)
+        self.intro_background = pygame.image.load(enviroment.background_image)
+        self.game_over_background = pygame.image.load(enviroment.gameover_image)
+
+    def play(self):
+        while self.playing:
+            self.events()
+            self.update()
+            self.draw()
 
     def new_game(self):
         self.playing = True
@@ -29,11 +41,16 @@ class Game:
         self.walls = pygame.sprite.LayeredUpdates()
         self.items = pygame.sprite.LayeredUpdates()
         self.threats = pygame.sprite.LayeredUpdates()
+        self.breakable_objects = pygame.sprite.LayeredUpdates()
         self.create_map()
         self.play_music()
 
     def events(self):
         for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.playing = False
+                    self.running = False
             if event.type == pygame.QUIT:
                 self.playing = False
                 self.running = False
@@ -44,6 +61,32 @@ class Game:
     def draw(self):
         self.screen.fill(enviroment.black)
         self.all_sprites.draw(self.screen)
+        for sprite in self.all_sprites:
+            if isinstance(sprite, Player):
+                hp_info = self.font.render(f' Hp: {sprite.hp}', True, enviroment.white)
+                self.screen.blit(hp_info, (0, 905))
+
+                bombs_info = self.font.render(f'{sprite.bombs}', True, enviroment.white)
+                self.screen.blit(bombs_info, (275, 905))
+                self.screen.blit(pygame.transform.scale(
+                    self.objects_spritesheet.get_sprite(50, 0, enviroment.tilesize, enviroment.tilesize), (40, 40)),
+                    (225, 905))
+
+                points_info = self.font.render(f'{sprite.points}', True, enviroment.white)
+                self.screen.blit(points_info, (500, 905))
+                self.screen.blit(pygame.transform.scale(
+                    self.objects_spritesheet.get_sprite(0, 0, enviroment.tilesize, enviroment.tilesize), (40, 40)),
+                                 (450, 905))
+
+                if sprite.dive_suit:
+                    self.screen.blit(pygame.transform.scale(
+                        self.objects_spritesheet.get_sprite(25, 0, enviroment.tilesize, enviroment.tilesize), (40, 40)),
+                        (360, 905))
+                else:
+                    self.screen.blit(pygame.transform.scale(
+                        self.objects_spritesheet.get_sprite(100, 0, enviroment.tilesize, enviroment.tilesize), (40, 40)),
+                        (360, 905))
+
         self.clock.tick(enviroment.fps)
         pygame.display.update()
 
@@ -88,10 +131,12 @@ class Game:
                 elif column == 'p':
                     Ground(self, j, i)
                     Player(self, j, i)
+                elif column == 'k':
+                    Cracked(self, j, i)
 
     def play_music(self):
-        pygame.mixer.music.load('../assets/theme.mp3')
-        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.load(enviroment.music_theme)
+        pygame.mixer.music.set_volume(0.01)
         pygame.mixer.music.play(10)
 
     def randomize_objects(self, list, changes, object):
@@ -109,3 +154,46 @@ class Game:
         new_list = [new_list_raw[n:n + len(list[0])] for n in range(0, len(new_list_raw), len(list[0]))]
 
         return new_list
+
+    def show_game_over(self):
+        text = self.font.render('Game Over', True, enviroment.black)
+        subtext = self.font.render('Pres SPACE to restart', True, enviroment.black)
+        subtext2 = self.font.render('Pres ESC to exit', True, enviroment.black)
+
+        for sprite in self.all_sprites:
+            sprite.kill()
+
+        while self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.running = False
+                    if event.key == pygame.K_SPACE:
+                        self.new_game()
+                        self.play()
+            self.screen.blit(self.game_over_background, (0, 0))
+            self.screen.blit(text, (650, 200))
+            self.screen.blit(subtext, (500, 300))
+            self.screen.blit(subtext2, (500, 400))
+            self.clock.tick(enviroment.fps)
+            pygame.display.update()
+
+    def show_intro_screen(self):
+        intro = True
+        title = self.font.render('8BitGame', True, enviroment.black)
+        subtitle = self.font.render('Press SPACE to play', True, enviroment.black)
+
+        while intro:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        intro = False
+            self.screen.blit(self.intro_background, (0, 0))
+            self.screen.blit(title, (650, 200))
+            self.screen.blit(subtitle, (500, 300))
+            self.clock.tick(enviroment.fps)
+            pygame.display.update()
