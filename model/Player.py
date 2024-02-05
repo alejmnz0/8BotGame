@@ -7,8 +7,8 @@ import model.Bomb
 import model.Water
 import model.Heart
 import model.Oxigen
-from model.Bomb import Bomb
-from model.Explotion import Explotion
+from model.Cracked import Cracked
+from model.Oxigen import Oxigen
 
 
 class Player(pygame.sprite.Sprite):
@@ -98,15 +98,33 @@ class Player(pygame.sprite.Sprite):
                     self.dive_suit = True
                 case model.Diamond.Diamond:
                     self.points += 25
+                    sound = pygame.mixer.Sound(enviroment.coin_sound)
+                    sound.play()
 
     def set_bomb(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_b] and not enviroment.b_pressed and self.bombs > 0:
-            print('hola')
-            bomb = Bomb(self.game, self.rect.x, self.rect.y)
-            bomb.collide_blocks()
+            sound = pygame.mixer.Sound(enviroment.bomb_sound)
+            sound.play()
             enviroment.b_pressed = True
             self.bombs -= 1
+            radius = enviroment.tilesize * 1.9
+
+            for sprite in self.game.all_sprites:
+                if isinstance(sprite, Cracked):
+                    position_x, position_y = sprite.rect.x, sprite.rect.y
+                    range_bomb = pygame.math.Vector2(position_x - self.rect.x, position_y - self.rect.y).length()
+
+                    if range_bomb <= radius:
+                        sprite.kill()
+                if isinstance(sprite, Oxigen):
+                    position_x, position_y = sprite.rect.x, sprite.rect.y
+                    range_bomb = pygame.math.Vector2(position_x - self.rect.x, position_y - self.rect.y).length()
+
+                    if range_bomb <= radius:
+                        sprite.kill()
+
+
         elif not keys[pygame.K_b]:
             enviroment.b_pressed = False
 
@@ -117,7 +135,6 @@ class Player(pygame.sprite.Sprite):
             enviroment.t_pressed = True
         elif not keys[pygame.K_t]:
             enviroment.t_pressed = False
-
 
     def take_damage(self):
         hits = pygame.sprite.spritecollide(self, self.game.threats, False)
@@ -147,20 +164,20 @@ class Player(pygame.sprite.Sprite):
                             self.game.character_spritesheet.get_sprite(200, 0, self.width, self.height)]
 
         dive_down_animations = [self.game.dive_spritesheet.get_sprite(0, 0, self.width, self.height),
-                           self.game.dive_spritesheet.get_sprite(25, 0, self.width, self.height),
-                           self.game.dive_spritesheet.get_sprite(50, 0, self.width, self.height)]
+                                self.game.dive_spritesheet.get_sprite(25, 0, self.width, self.height),
+                                self.game.dive_spritesheet.get_sprite(50, 0, self.width, self.height)]
 
         dive_up_animations = [self.game.dive_spritesheet.get_sprite(75, 0, self.width, self.height),
-                         self.game.dive_spritesheet.get_sprite(100, 0, self.width, self.height),
-                         self.game.dive_spritesheet.get_sprite(125, 0, self.width, self.height)]
+                              self.game.dive_spritesheet.get_sprite(100, 0, self.width, self.height),
+                              self.game.dive_spritesheet.get_sprite(125, 0, self.width, self.height)]
 
         dive_left_animations = [self.game.dive_spritesheet.get_sprite(225, 0, self.width, self.height),
-                           self.game.dive_spritesheet.get_sprite(250, 0, self.width, self.height),
-                           self.game.dive_spritesheet.get_sprite(275, 0, self.width, self.height)]
+                                self.game.dive_spritesheet.get_sprite(250, 0, self.width, self.height),
+                                self.game.dive_spritesheet.get_sprite(275, 0, self.width, self.height)]
 
         dive_right_animations = [self.game.dive_spritesheet.get_sprite(150, 0, self.width, self.height),
-                            self.game.dive_spritesheet.get_sprite(175, 0, self.width, self.height),
-                            self.game.dive_spritesheet.get_sprite(200, 0, self.width, self.height)]
+                                 self.game.dive_spritesheet.get_sprite(175, 0, self.width, self.height),
+                                 self.game.dive_spritesheet.get_sprite(200, 0, self.width, self.height)]
 
         if self.facing == 'down':
             if self.y_change == 0:

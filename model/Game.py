@@ -4,7 +4,6 @@ import pygame
 import enviroment
 from model.Cracked import Cracked
 from model.Diamond import Diamond
-from model.Explotion import Explotion
 from model.Heart import Heart
 from model.Oxigen import Oxigen
 from model.Player import Player
@@ -28,6 +27,7 @@ class Game:
         self.objects_spritesheet = Spritesheet(enviroment.objects_sprites)
         self.intro_background = pygame.image.load(enviroment.background_image)
         self.game_over_background = pygame.image.load(enviroment.gameover_image)
+        self.menu_background = pygame.image.load(enviroment.menu_image)
 
     def play(self):
         while self.playing:
@@ -49,11 +49,9 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.playing = False
-                    self.running = False
+                    self.show_menu_screen()
             if event.type == pygame.QUIT:
-                self.playing = False
-                self.running = False
+                self.show_menu_screen()
 
     def update(self):
         self.all_sprites.update()
@@ -96,7 +94,6 @@ class Game:
         for x in tilemap1:
             tilemap2.append(x.split(','))
 
-        print(tilemap2)
         random_objects = []
         for x in tilemap2[-1]:
             random_objects.append(x.split(':'))
@@ -132,11 +129,12 @@ class Game:
                     Ground(self, j, i)
                     Player(self, j, i)
                 elif column == 'k':
+                    Ground(self, j, i)
                     Cracked(self, j, i)
 
     def play_music(self):
         pygame.mixer.music.load(enviroment.music_theme)
-        pygame.mixer.music.set_volume(0.01)
+        pygame.mixer.music.set_volume(0.1)
         pygame.mixer.music.play(10)
 
     def randomize_objects(self, list, changes, object):
@@ -189,11 +187,40 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                    intro = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         intro = False
             self.screen.blit(self.intro_background, (0, 0))
             self.screen.blit(title, (650, 200))
             self.screen.blit(subtitle, (500, 300))
+            self.clock.tick(enviroment.fps)
+            pygame.display.update()
+
+    def show_menu_screen(self):
+        confirm = True
+        text = self.font.render('Are you sure?', True, enviroment.white)
+        subtext = self.font.render('Pres SPACE to resume', True, enviroment.white)
+        subtext2 = self.font.render('Pres ESC to exit', True, enviroment.white)
+
+        while confirm:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    confirm = False
+                    self.playing = False
+                    self.running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        confirm = False
+                        self.playing = True
+                        self.running = True
+                    if event.key == pygame.K_ESCAPE:
+                        confirm = False
+                        self.playing = False
+                        self.running = False
+            self.screen.blit(self.menu_background, (0, 0))
+            self.screen.blit(text, (650, 200))
+            self.screen.blit(subtext, (550, 300))
+            self.screen.blit(subtext2, (550, 400))
             self.clock.tick(enviroment.fps)
             pygame.display.update()
