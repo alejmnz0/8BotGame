@@ -5,9 +5,10 @@ from model.Item import Item
 
 
 class Oxigen(pygame.sprite.Sprite):
+# class Oxigen(Item):
 
     # def __init__(self, game, x, y):
-    #     super().__init__(game, x, y)
+    #     super().__init__(game, x, y, (self.game.all_sprites, self.game.items, self.game.breakable_objects))
     #     self.image = self.game.objects_spritesheet.get_sprite(25, 0, self.width, self.height)
 
     def __init__(self, game, x, y):

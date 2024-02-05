@@ -20,6 +20,7 @@ class Game:
         self.screen = pygame.display.set_mode([enviroment.width, enviroment.height])
         self.clock = pygame.time.Clock()
         self.running = True
+        self.diamonds_remaining = 0
         self.font = pygame.font.Font(enviroment.font, enviroment.font_size)
         self.character_spritesheet = Spritesheet(enviroment.character_sprites)
         self.dive_spritesheet = Spritesheet(enviroment.dive_sprites)
@@ -85,6 +86,9 @@ class Game:
                         self.objects_spritesheet.get_sprite(100, 0, enviroment.tilesize, enviroment.tilesize), (40, 40)),
                         (360, 905))
 
+                diamonds_info = self.font.render(f'{self.diamonds_remaining} yet', True, enviroment.white)
+                self.screen.blit(diamonds_info, (1400, 905))
+
         self.clock.tick(enviroment.fps)
         pygame.display.update()
 
@@ -125,6 +129,7 @@ class Game:
                 elif column == 'd':
                     Ground(self, j, i)
                     Diamond(self, j, i)
+                    self.diamonds_remaining += 1
                 elif column == 'p':
                     Ground(self, j, i)
                     Player(self, j, i)
@@ -169,6 +174,7 @@ class Game:
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
                     if event.key == pygame.K_SPACE:
+                        self.diamonds_remaining = 0
                         self.new_game()
                         self.play()
             self.screen.blit(self.game_over_background, (0, 0))
@@ -222,5 +228,31 @@ class Game:
             self.screen.blit(text, (650, 200))
             self.screen.blit(subtext, (550, 300))
             self.screen.blit(subtext2, (550, 400))
+            self.clock.tick(enviroment.fps)
+            pygame.display.update()
+
+    def show_win_screen(self):
+        win = True
+        text = self.font.render('You win!', True, enviroment.black)
+        subtext = self.font.render('Pres SPACE to play again', True, enviroment.black)
+        subtext2 = self.font.render('Pres ESC to exit', True, enviroment.black)
+
+        while win:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        win = False
+                        self.playing = False
+                        self.running = False
+                    if event.key == pygame.K_SPACE:
+                        win = False
+                        self.new_game()
+                        self.play()
+            self.screen.blit(self.game_over_background, (0, 0))
+            self.screen.blit(text, (650, 200))
+            self.screen.blit(subtext, (500, 300))
+            self.screen.blit(subtext2, (500, 400))
             self.clock.tick(enviroment.fps)
             pygame.display.update()

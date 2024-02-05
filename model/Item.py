@@ -8,6 +8,7 @@ class Item(pygame.sprite.Sprite):
         self.game = game
         self._layer = enviroment.player_layer
         self.groups = self.game.all_sprites, self.game.items
+        # self.groups = groups
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.x = x * enviroment.tilesize
         self.y = y * enviroment.tilesize

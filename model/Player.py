@@ -98,6 +98,9 @@ class Player(pygame.sprite.Sprite):
                     self.dive_suit = True
                 case model.Diamond.Diamond:
                     self.points += 25
+                    self.game.diamonds_remaining -= 1
+                    if self.game.diamonds_remaining == 0:
+                        self.game.show_win_screen()
                     sound = pygame.mixer.Sound(enviroment.coin_sound)
                     sound.play()
 
